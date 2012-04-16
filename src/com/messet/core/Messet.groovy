@@ -174,6 +174,10 @@ class Messet {
 		println stack
 	}
 	
+	/**
+	 * Displays the current memory in the VM
+	 * @return
+	 */
 	def displayMemory() {
 		println "Memory Contents:"
 		for(word in dataMemory) {
@@ -183,6 +187,14 @@ class Messet {
 
 	def displayRegister(String register) {
 		println "Register [$register]: " + getRegister(register)?.data
+	}
+	
+	/**
+	 * Score the VM, against a goal VM
+	 */
+	def score(Messet goal) {
+		//The closer we are to zero, the better
+		int score = 0
 	}
 	
 	/**

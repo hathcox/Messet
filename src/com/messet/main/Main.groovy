@@ -1,5 +1,6 @@
 package com.messet.main
 
+import com.lanistae.core.Lanistae
 import com.messet.core.Messet
 
 class Main {
@@ -9,6 +10,11 @@ class Main {
 	
 	static main(args) {
 		println "Welcome to Messet"
+		Lanistae lan = new Lanistae(20, null, null, 5, 1, 1, 1)
+		lan.randomInitialize()
+	}
+	
+	void runTestProgram() {
 		def instructions = new File('test/easy.ms').readLines()
 		vm.loadInstructions(instructions)
 		vm.run()

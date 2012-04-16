@@ -141,6 +141,10 @@ class Messet {
 				executeJe(destination)
 				break
 
+			case "set":
+				executeSet(destination, source)
+				break
+				
 			default:
 				println "Unknown Opp Code [$function]"
 		}
@@ -168,6 +172,13 @@ class Messet {
 		println this.dataMemory
 		println "Stack:"
 		println stack
+	}
+	
+	def displayMemory() {
+		println "Memory Contents:"
+		for(word in dataMemory) {
+			println "[$word.address] : [$word.data]"
+		}
 	}
 
 	def displayRegister(String register) {
@@ -420,6 +431,34 @@ class Messet {
 			println "Invalid target for je!"
 		}
 	}
+	
+	def executeSet(String destination, String source) {
+		//Grab the registers if thats what we got
+		def destReg = getRegister(destination)
+		def sourceReg = getRegister(source)
+		
+		//Check to see if we have a register
+		if(destReg != null) {
+			if(sourceReg != null) {
+				set(destReg.data, sourceReg.data)
+			} else if (source.isLong()) {
+				set(destReg.data, Long.parseLong(source))
+			} else {
+				println "Invalid source inside Set"
+			}
+		} else if (destination.isLong()) {
+			if(sourceReg != null) {
+				set(Long.parseLong(destination), sourceReg.data)
+			} else if (source.isLong()) {
+				set(Long.parseLong(destination), Long.parseLong(source))
+			} else {
+				println "Invalid source inside Set"
+			}
+		} else {
+			println "Invalid destination inside Set"
+		}
+		
+	}
 	/**
 	 * Instruction Functions
 	 */
@@ -511,5 +550,30 @@ class Messet {
 		} else {
 			//Do nothing
 		}
+	}
+	
+	/**
+	 * This sets a location in memory to the given value,
+	 * if the location doesn't exit, it is created
+	 * 
+	 * @param destination
+	 * @param source
+	 * @return
+	 */
+	def set(long destination, long source) {
+		
+		//If we dont have enough memory already allocated
+		if(this.dataMemory.size() < destination) {
+			def wordsToCreate = destination - dataMemory.size
+			def offset = this.dataMemory.size
+			for(word in 0..(wordsToCreate)) {
+				def newWord = new MemoryWord()
+				newWord.setAddress(offset + word)
+				dataMemory.add(newWord)
+			}
+			
+		}
+		//Set our peice of memory
+		dataMemory[destination as int].data = source
 	}
 }

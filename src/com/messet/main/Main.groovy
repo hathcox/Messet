@@ -12,6 +12,7 @@ class Main {
 		def instructions = new File('test/easy.ms').readLines()
 		vm.loadInstructions(instructions)
 		vm.run()
+		vm.displayMemory()
 	}
 	
 	void consolePromptLoop() {

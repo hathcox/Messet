@@ -7,6 +7,9 @@ package com.messet.core
  */
 class Messet {
 
+	/** Score for Lanistae*/
+	int score = 0
+	
 	/** Instruction Pointer */
 	Register mip
 
@@ -194,7 +197,26 @@ class Messet {
 	 */
 	def score(Messet goal) {
 		//The closer we are to zero, the better
-		int score = 0
+		score += Math.abs(this.msp - goal.msp)
+		score += Math.abs(this.mbp - goal.mbp)
+		score += Math.abs(this.mcr - goal.mcr)
+		score += Math.abs(this.mgpa - goal.mgpa)
+		score += Math.abs(this.mgpb - goal.mgpb)
+		score += Math.abs(this.mgpc - goal.mgpc)
+		score += Math.abs(this.mgpd - goal.mgpd)
+		
+		//Add up all of memory
+		for(index in 0..(dataMemory.size()-1)) {
+			score += Math.abs(dataMemory[index].data - goal.dataMemory[index].data)
+		}
+		
+	}
+	
+	/**
+	 * Mutates a given VM based on provided muatation chance and rate
+	 */
+	def mutate(float mutationChance, float mutationFactor) {
+		
 	}
 	
 	/**

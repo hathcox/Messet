@@ -61,12 +61,18 @@ class Lanistae {
 		}
 	}
 	
+	void sortCurrentGeneration() {
+		this.currentGeneration.sort {
+			it.score
+		}
+	}
+	
 	void evolve() {
 		'''
 		This is the meat of the program!
 		'''
 		//Temporary variable to work with
-		def nextGeneration = []
+		ArrayList<Messet> nextGeneration = new ArrayList<Messet>()
 		
 		//Run the current Generation
 		runCurrentGeneration()
@@ -75,21 +81,21 @@ class Lanistae {
 		sortCurrentGeneration()
 		
 		//Grab a batch of the most fit solutions (based on the elitismRate)
-		numberOfElite = self.populationSize * self.elitismRate
-		for( index in range(numberOfElite))
-			nextGeneration.append(self.currentGeneration[index])
+		int numberOfElite = populationSize * elitism
+		for(index in 0..(numberOfElite-1))
+			nextGeneration.add(currentGeneration[index])
 		
 		//Mutate the parents (based on the mutationChance, and mutationFactor)
 		for (solution in nextGeneration)
-			solution.mutate(self.mutationChance, self.mutationFactor)
+			solution.mutate(mutationChance, mutationFactor)
 		
 		//Fill back to the populationSize with random new Solutions
 		while( len(nextGeneration) < self.populationSize)
 			nextGeneration.append(Solution.Solution(self.validCoins, self.numberOfCoins, self.targetValue))
 		
 		//Update the Generation
-		self.currentGeneration = nextGeneration
-		self.generationCount += 1
+		currentGeneration = nextGeneration
+		generationCount += 1
 	}
 
 }

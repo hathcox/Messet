@@ -6,7 +6,7 @@ import com.messet.core.Messet
 class Main {
 	static Scanner scanner = new Scanner(System.in)
 
-	def static vm = new Messet()
+	static Messet vm = new Messet()
 	
 	static main(args) {
 		println "Welcome to Messet"

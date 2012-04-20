@@ -20,7 +20,7 @@ class Lanistae {
 	ArrayList<Messet> currentGeneration
 	int maxInstructionSize
 	
-	public Lanistae(int maxInstructionSize, Messet goalVM, def goals, int populationSize, float mutationChance, float mutationFactor, float elitism) {
+	public Lanistae(int maxInstructionSize, Messet goalVM, def goals, int populationSize, float mutationChance, float elitism) {
 		this.goals = goals
 		this.populationSize = populationSize
 		this.mutationChance = mutationChance
@@ -33,11 +33,18 @@ class Lanistae {
 	
 	void randomInitialize() {
 		for(vm in 0..(populationSize-1)) {
-			def newVM = new Messet()
-			def randomInstructionList = generateRandomInstructionList()
-			newVM.loadInstructions(randomInstructionList)
-			currentGeneration[vm] = newVM
+			currentGeneration[vm] = generateRandomVm()
 		}
+	}
+	
+	def generateRandomVm() {
+		def newVM = new Messet()
+		def randomInstructionList = generateRandomInstructionList()
+		def exitInstruction = new Instruction()
+		exitInstruction.makeExit()
+		randomInstructionList.add(exitInstruction)
+		newVM.loadInstructions(randomInstructionList)
+		return newVM
 	}
 	
 	List<String> generateRandomInstructionList() {
@@ -49,7 +56,7 @@ class Lanistae {
 			tempInstruction.randomize()
 			instructionList.add(tempInstruction.data)
 		}
-		println instructionList
+		//println instructionList
 		return instructionList
 	}
 	
@@ -82,16 +89,16 @@ class Lanistae {
 		
 		//Grab a batch of the most fit solutions (based on the elitismRate)
 		int numberOfElite = populationSize * elitism
-		for(index in 0..(numberOfElite-1))
+		for(int index=0; index < numberOfElite; index++)
 			nextGeneration.add(currentGeneration[index])
 		
 		//Mutate the parents (based on the mutationChance, and mutationFactor)
-		for (solution in nextGeneration)
-			solution.mutate(mutationChance, mutationFactor)
+		for (vm in nextGeneration)
+			vm.mutate(mutationChance)
 		
 		//Fill back to the populationSize with random new Solutions
-		while( len(nextGeneration) < self.populationSize)
-			nextGeneration.append(Solution.Solution(self.validCoins, self.numberOfCoins, self.targetValue))
+		while(nextGeneration.size() < populationSize)
+			nextGeneration.add(generateRandomVm())
 		
 		//Update the Generation
 		currentGeneration = nextGeneration

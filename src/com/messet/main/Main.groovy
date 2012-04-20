@@ -10,8 +10,25 @@ class Main {
 	
 	static main(args) {
 		println "Welcome to Messet"
-		Lanistae lan = new Lanistae(20, null, null, 5, 1, 1, 1)
+		def goalVM = new Messet()
+		goalVM.mgpa.data = 5
+		goalVM.mgpb.data = 10
+		goalVM.mgpc.data = 15
+		goalVM.mgpd.data = 20
+		Lanistae lan = new Lanistae(20, goalVM, null, 20, (0.1), (0.2))
 		lan.randomInitialize()
+		while(true) {
+			lan.evolve();
+			println "Leading Score:" + lan.currentGeneration[0].score
+			if(lan.currentGeneration[0].score == 0) {
+				println "Winner!"
+				lan.currentGeneration[0].programMemory.each {
+					println it	
+				}
+				System.exit(0);
+			}
+			
+		}
 	}
 	
 	void runTestProgram() {

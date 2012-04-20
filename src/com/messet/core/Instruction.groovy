@@ -9,21 +9,14 @@ package com.messet.core
 class Instruction {
 	
 	static final List<String> opCodes = [
-		"jmp",
-		"je",
 		"add",
 		"sub",
 		"mul",
 		"div",
-		"cmp",
 		"mov",
-		"set"
 	]
 	
 	static final List<String> useableRegisters = [
-		"msp",
-		"msp",
-		"mbp",
 		"mcr",
 		"mgpa",
 		"mgpb",
@@ -59,7 +52,7 @@ class Instruction {
 		Random random = new Random()
 		def randomOpCodeIndex = random.nextInt(opCodes.size())
 		def randomRegisterIndex = random.nextInt(useableRegisters.size())
-		def randomNumber = Math.abs(random.nextInt(32000))
+		def randomNumber = Math.abs(random.nextInt(100))
 		def diceRoll = random.nextInt(7)
 		//Use a register
 		if(diceRoll > 0) {
@@ -70,8 +63,13 @@ class Instruction {
 				data = "${opCodes[randomOpCodeIndex]} $randomNumber ${useableRegisters[randomRegisterIndex]}"
 			}
 		} else {
-			def secondRandomNumber = Math.abs(random.nextInt(32000))
+			def secondRandomNumber = Math.abs(random.nextInt(100))
 			data = "${opCodes[randomOpCodeIndex]} $secondRandomNumber $randomNumber"
 		}
+	}
+	
+	//Set the data to the exit instruction
+	def makeExit() {
+		data = "mov mer 1"
 	}
 }

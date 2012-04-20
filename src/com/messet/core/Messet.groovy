@@ -8,7 +8,10 @@ package com.messet.core
 class Messet {
 
 	/** Score for Lanistae*/
-	int score = 0
+	long score = 0
+	
+	/** Invalid counter */
+	long invalid = 0
 	
 	/** Instruction Pointer */
 	Register mip
@@ -66,6 +69,7 @@ class Messet {
 		this.mcr = new Register()
 		this.programMemory = new ArrayList<Instruction>()
 		this.dataMemory = new ArrayList<MemoryWord>()
+		fillDataMemory(2000)
 		this.stack = new MessetStack()
 		this.mgpa = new Register()
 		this.mgpb = new Register()
@@ -86,9 +90,8 @@ class Messet {
 	 * @return
 	 */
 	def execute(String line) {
-		//def function = line.substring(0, line.indexOf(' ')).toLowerCase()
 		def peices = line.split()
-		println peices
+		//println peices
 		def function = null
 		def destination = null
 		def source = null
@@ -107,7 +110,7 @@ class Messet {
 
 		//Jump into dealing with the right Opp Code
 		if (destination == null && source == null) {
-			println "Error parse the destination or source"
+			//println "Error parse the destination or source"
 			return
 		}
 		switch(function) {
@@ -192,31 +195,44 @@ class Messet {
 		println "Register [$register]: " + getRegister(register)?.data
 	}
 	
+	def fillDataMemory(int dataSize){
+		for(int index=0; index < dataSize; index++) {
+			this.dataMemory.add(new MemoryWord())
+		}
+	}
 	/**
 	 * Score the VM, against a goal VM
 	 */
 	def score(Messet goal) {
 		//The closer we are to zero, the better
-		score += Math.abs(this.msp - goal.msp)
-		score += Math.abs(this.mbp - goal.mbp)
-		score += Math.abs(this.mcr - goal.mcr)
-		score += Math.abs(this.mgpa - goal.mgpa)
-		score += Math.abs(this.mgpb - goal.mgpb)
-		score += Math.abs(this.mgpc - goal.mgpc)
-		score += Math.abs(this.mgpd - goal.mgpd)
+		//score += Math.abs(this.msp.data - goal.msp.data)
+		//score += Math.abs(this.mbp.data - goal.mbp.data)
+		//score += Math.abs(this.mcr.data - goal.mcr.data)
+		score += Math.abs(this.mgpa.data - goal.mgpa.data)
+		score += Math.abs(this.mgpb.data - goal.mgpb.data)
+		score += Math.abs(this.mgpc.data - goal.mgpc.data)
+		score += Math.abs(this.mgpd.data - goal.mgpd.data)
 		
 		//Add up all of memory
-		for(index in 0..(dataMemory.size()-1)) {
-			score += Math.abs(dataMemory[index].data - goal.dataMemory[index].data)
-		}
-		
+//		println "Data Memory Size:"+dataMemory.size
+//		println "Goal Memory Size:"+goal.dataMemory.size
+//		for(int index = 0; index < goal.dataMemory.size; index++) {
+//			score += Math.abs(dataMemory[index].data - goal.dataMemory[index].data)
+//		}
+		score += invalid * 1000
 	}
 	
 	/**
 	 * Mutates a given VM based on provided muatation chance and rate
 	 */
-	def mutate(float mutationChance, float mutationFactor) {
-		
+	def mutate(float mutationChance) {
+		Random random = new Random()
+		for(int index = 0; index < programMemory.size()-1; index++) {
+			def diceRoll = random.nextFloat()
+			if(diceRoll > mutationChance) {
+				programMemory[index].randomize()
+			}
+		}
 	}
 	
 	/**
@@ -226,14 +242,15 @@ class Messet {
 	def run() {
 		/**
 		 * Mer need to get set or the vm will hang. In the future we should attempt to detect this
-		 */
+		 */		
 		while(mer.data != 1) {
 			if(mip.data < programMemory.size()) {
+				//println this.programMemory.get(mip.data as int).data
 				execute(this.programMemory.get(mip.data as int).data)
 				mip.data += 1
 			} else {
-				println "Attempted to enter an invalid instruction location"
-				println "Shutting down the vm..."
+//				println "Attempted to enter an invalid instruction location"
+//				println "Shutting down the vm..."
 				//Set the exit flag
 				mer.data = 1
 			}
@@ -321,10 +338,12 @@ class Messet {
 			else if(source.isLong()) {
 				mov(destReg, Long.parseLong(source))
 			} else {
-				println "Invalid Source inside Mov!"
+				//println "Invalid Source inside Mov!"
+				invalid ++
 			}
 		} else {
-			println "Mov's destination should be a register!"
+			//println "Mov's destination should be a register!"
+			invalid++
 		}
 	}
 
@@ -343,10 +362,12 @@ class Messet {
 			else if(source.isLong()) {
 				add(destReg, Long.parseLong(source))
 			} else {
-				println "Invalid Source inside Add!"
+				//println "Invalid Source inside Add!"
+				invalid++
 			}
 		} else {
-			println "Add's destination should be a register!"
+			//println "Add's destination should be a register!"
+			invalid++
 		}
 	}
 
@@ -365,10 +386,12 @@ class Messet {
 			else if(source.isLong()) {
 				sub(destReg, Long.parseLong(source))
 			} else {
-				println "Invalid Source inside Sub!"
+				//println "Invalid Source inside Sub!"
+				invalid++
 			}
 		} else {
-			println "Sub's destination should be a register!"
+			//println "Sub's destination should be a register!"
+			invalid++
 		}
 	}
 
@@ -387,10 +410,12 @@ class Messet {
 			else if(source.isLong()) {
 				mul(destReg, Long.parseLong(source))
 			} else {
-				println "Invalid Source inside Mul!"
+				//println "Invalid Source inside Mul!"
+				invalid++
 			}
 		} else {
-			println "Mul's destination should be a register!"
+			invalid++
+			//println "Mul's destination should be a register!"
 		}
 	}
 	
@@ -409,10 +434,12 @@ class Messet {
 			else if(source.isLong()) {
 				div(destReg, Long.parseLong(source))
 			} else {
-				println "Invalid Source inside Div!"
+				//println "Invalid Source inside Div!"
+				invalid++
 			}
 		} else {
-			println "Div's destination should be a register!"
+			//println "Div's destination should be a register!"
+			invalid++
 		}
 	}
 	
@@ -431,10 +458,12 @@ class Messet {
 			else if(source.isLong()) {
 				cmp(destReg, Long.parseLong(source))
 			} else {
-				println "Invalid Source inside cmp!"
+				//println "Invalid Source inside cmp!"
+				invalid++
 			}
 		} else {
-			println "cmp's destination should be a register!"
+			//println "cmp's destination should be a register!"
+			invalid++
 		}
 	}
 	
@@ -448,7 +477,8 @@ class Messet {
 		} else if(destination.isLong()){
 			jmp(Long.valueOf(destination))
 		} else {
-			println "Invalid imput for Jmp"
+			//println "Invalid imput for Jmp"
+			invalid++
 		}
 	}
 	
@@ -462,7 +492,8 @@ class Messet {
 		} else if(destination.isLong()) {
 			je(Long.parseLong(destination))
 		} else {
-			println "Invalid target for je!"
+			//println "Invalid target for je!"
+			invalid++
 		}
 	}
 	
@@ -478,7 +509,8 @@ class Messet {
 			} else if (source.isLong()) {
 				set(destReg.data, Long.parseLong(source))
 			} else {
-				println "Invalid source inside Set"
+				//println "Invalid source inside Set"
+				invalid++
 			}
 		} else if (destination.isLong()) {
 			if(sourceReg != null) {
@@ -486,10 +518,12 @@ class Messet {
 			} else if (source.isLong()) {
 				set(Long.parseLong(destination), Long.parseLong(source))
 			} else {
-				println "Invalid source inside Set"
+				//println "Invalid source inside Set"
+				invalid++
 			}
 		} else {
-			println "Invalid destination inside Set"
+			//println "Invalid destination inside Set"
+			invalid++
 		}
 		
 	}
@@ -534,7 +568,12 @@ class Messet {
 	 * @return
 	 */
 	def div(Register destination, long source) {
-		destination.data /= source
+		if(source != 0) {
+			destination.data /= source
+		} else {
+			invalid++
+			//println "Divide by zero!"
+		}
 	}
 
 	/**
@@ -597,17 +636,16 @@ class Messet {
 	def set(long destination, long source) {
 		
 		//If we dont have enough memory already allocated
-		if(this.dataMemory.size() < destination) {
-			def wordsToCreate = destination - dataMemory.size
-			def offset = this.dataMemory.size
-			for(word in 0..(wordsToCreate)) {
-				def newWord = new MemoryWord()
-				newWord.setAddress(offset + word)
-				dataMemory.add(newWord)
+		if(destination >= 0 && destination <= 20000) {
+			while (dataMemory.size < destination+1) {
+				dataMemory.add(new MemoryWord())
 			}
 			
+			//Set our peice of memory
+			dataMemory[destination as int].data = source
+		} else {
+			//println "Invalid Set destination"
+			invalid++
 		}
-		//Set our peice of memory
-		dataMemory[destination as int].data = source
 	}
 }
